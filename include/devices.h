@@ -60,18 +60,16 @@ unsigned int led_get(void);
 
 /* 7-Segment Display Functions */
 void display_init(void);
-void display_set(int display_num, unsigned char value);
-void display_set_hex(int display_num, unsigned char digit);
 void display_clear(int display_num);
 void display_clear_all(void);
-void display_number(unsigned int number);  /* Show number across all displays */
-void display_time(int hours, int minutes, int seconds);
+void display_hex(unsigned int number);      /* Display as hexadecimal */
+void display_decimal(unsigned int number);  /* Display as decimal */
+void display_digit(int display_num, unsigned char digit); /* Show 0-F on one display */
+void display_string(const char *str);       /* Display up to 6 characters */
 
 /* Button Functions */
 void button_init(void);
 int button_is_pressed(void);
-int button_wait_press(void);    /* Block until button pressed */
-int button_wait_release(void);  /* Block until button released */
 
 /* Switch Functions */
 void switch_init(void);
@@ -79,9 +77,12 @@ unsigned int switch_read(void);
 int switch_get(int switch_num);
 
 /* GPIO Functions */
+#define GPIO_PIN_COUNT 40
+
 void gpio_init(void);
 void gpio_set_direction(int pin, int output);  /* 1=output, 0=input */
 void gpio_write(int pin, int value);
 int gpio_read(int pin);
+void gpio_toggle(int pin);
 
 #endif /* DEVICES_H */

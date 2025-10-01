@@ -4,6 +4,9 @@ RISC-V embedded system framework for the DTEK-V board.
 This repository was created to help the completion of various labs and projects
 found within the KTH IS1200/1500 course.
 
+This repository is setup as a template making it super simple to get started.
+All you have to do is press the green "Use this template" button and a repository based on this one will be created.
+
 ## Project Structure
 
 ```
@@ -62,10 +65,10 @@ make help     # Show all available targets
 ### Device Drivers (devices)
 
 - **LEDs**: `led_init()`, `led_set()`, `led_on()`, `led_off()`, `led_toggle()`
-- **7-Segment Displays**: `display_set()`, `display_number()`, `display_time()`
-- **Buttons**: `button_is_pressed()`, `button_wait_press()`
+- **7-Segment Displays**: `display_init()`, `display_hex()`, `display_decimal()`, `display_digit()`, `display_string()`, `display_clear()`
+- **Buttons**: `button_is_pressed()`
 - **Switches**: `switch_read()`, `switch_get()`
-- **GPIO**: `gpio_set_direction()`, `gpio_write()`, `gpio_read()`
+- **GPIO**: `gpio_set_direction()`, `gpio_write()`, `gpio_read()`, `gpio_toggle()`
 
 ### Utilities (utils)
 
@@ -100,7 +103,9 @@ int main(void) {
     printf("Switch state: 0x%x\n", sw);
 
     // Display number
-    display_number(0x123456);
+    display_hex(0x123456);      // Shows "123456" in hex
+    display_decimal(42);         // Shows "42" in decimal
+    display_string("HELLO");     // Shows "HELLO"
 
     // Dump registers for debugging
     reg_dump_all();

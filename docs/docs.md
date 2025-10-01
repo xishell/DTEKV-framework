@@ -170,6 +170,121 @@ Interrupt handler (called by boot.S) with skeleton handlers for all devices.
 
 ---
 
+## Device Driver API
+
+### LED Functions
+
+#### `void led_init(void)`
+Initialize LEDs (all off).
+
+#### `void led_set(unsigned int mask)`
+Set LED state using bitmask (bits 0-9 for LEDs 0-9).
+- **Example**: `led_set(0x3FF)` turns all 10 LEDs on
+
+#### `void led_on(int led_num)`
+Turn on specific LED (0-9).
+
+#### `void led_off(int led_num)`
+Turn off specific LED (0-9).
+
+#### `void led_toggle(int led_num)`
+Toggle specific LED (0-9).
+
+#### `unsigned int led_get(void)`
+Get current LED state as bitmask.
+
+---
+
+### 7-Segment Display Functions
+
+The board has 6 displays numbered 0-5 (right to left, where 5 is leftmost).
+
+#### `void display_init(void)`
+Initialize displays (clears all).
+
+#### `void display_hex(unsigned int number)`
+Display number in hexadecimal format (max 0xFFFFFF for 6 displays).
+- **Example**: `display_hex(0x1234)` shows "001234"
+
+#### `void display_decimal(unsigned int number)`
+Display number in decimal format with leading zero suppression (max 999999).
+- **Example**: `display_decimal(42)` shows "42"
+
+#### `void display_digit(int display_num, unsigned char digit)`
+Display single hex digit (0-F) on specified display (0-5).
+- **Example**: `display_digit(0, 0xA)` shows "A" on rightmost display
+
+#### `void display_string(const char *str)`
+Display up to 6 characters (limited character set).
+- **Supported characters**: 0-9, A-F (case insensitive), H, L, O, P, U, space, -, _
+- **Example**: `display_string("HELLO")` shows "HELLO"
+
+#### `void display_clear(int display_num)`
+Clear specific display (0-5).
+
+#### `void display_clear_all(void)`
+Clear all displays.
+
+---
+
+### Button Functions
+
+The board has one button (button 0).
+
+#### `void button_init(void)`
+Initialize button (no-op, buttons are input-only).
+
+#### `int button_is_pressed(void)`
+Check if button is currently pressed.
+- **Returns**: Non-zero if pressed, 0 otherwise
+
+---
+
+### Switch Functions
+
+The board has 10 switches numbered 0-9.
+
+#### `void switch_init(void)`
+Initialize switches (no-op, switches are input-only).
+
+#### `unsigned int switch_read(void)`
+Read all switch states as bitmask.
+- **Returns**: 10-bit value (bits 0-9 for switches 0-9)
+
+#### `int switch_get(int switch_num)`
+Read specific switch state (0-9).
+- **Returns**: 1 if switch is on, 0 if off
+
+---
+
+### GPIO Functions
+
+The board has 40 GPIO pins (0-39) organized as two banks of 20.
+
+#### `void gpio_init(void)`
+Initialize all GPIO pins as inputs.
+
+#### `void gpio_set_direction(int pin, int output)`
+Configure pin direction.
+- **Parameters**:
+  - `pin`: Pin number (0-39)
+  - `output`: 1 for output, 0 for input
+
+#### `void gpio_write(int pin, int value)`
+Write value to GPIO pin (must be configured as output).
+- **Parameters**:
+  - `pin`: Pin number (0-39)
+  - `value`: 1 for high, 0 for low
+
+#### `int gpio_read(int pin)`
+Read value from GPIO pin.
+- **Returns**: 1 if high, 0 if low
+
+#### `void gpio_toggle(int pin)`
+Toggle GPIO pin state (must be configured as output).
+
+---
+
 ## Memory Map
 
 ### System Memory
@@ -302,17 +417,40 @@ void handle_button_interrupt(void) {
 
 **Hex Displays (0x04000050 + n×0x10)**
 
+The board has 6 seven-segment displays numbered 0-5 (right to left). Use the high-level `display_*` functions from devices.h for easy control:
+
+```c
+#include "devices.h"
+
+// Initialize displays
+display_init();
+
+// Display numbers
+display_hex(0x123ABC);        // Shows hex number "123ABC"
+display_decimal(42);           // Shows decimal "42" with leading zero suppression
+display_digit(0, 5);          // Shows digit "5" on rightmost display
+
+// Display text (limited character set: digits, A-F, H, L, O, P, U, space, -, _)
+display_string("HELLO");      // Shows "HELLO" on displays
+
+// Clear displays
+display_clear(0);             // Clear rightmost display
+display_clear_all();          // Clear all displays
+```
+
+Low-level register access (not recommended - use display_* functions instead):
+
 ```c
 #define DISP_BASE   0x04000050
 #define NUM_DISPLAYS 6
 #define DISP_STRIDE 0x10
 
-void set_display(int display_number, unsigned char value) {
+void set_display_raw(int display_number, unsigned char segment_value) {
     if (display_number < 0 || display_number >= NUM_DISPLAYS)
         return;
     volatile unsigned int *addr =
         (volatile unsigned int *)(DISP_BASE + (display_number * DISP_STRIDE));
-    *addr = value & 0xFF;
+    *addr = segment_value & 0xFF;  // Raw 7-segment pattern
 }
 ```
 
