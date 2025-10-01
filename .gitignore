@@ -1,6 +1,5 @@
 # Compiled object files
 *.o
-*.a
 *.obj
 *.elf
 
@@ -28,6 +27,7 @@ dist/
 *.swp
 *.swo
 *~
+.clangd
 .DS_Store
 
 # Compilation database
